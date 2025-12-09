@@ -23,7 +23,7 @@ public class UsersController {
     }
 
     @GetMapping("/getEmpById/{id}")
-    public ResponseEntity<?> getEmployee(@RequestParam("id") UUID id, @RequestHeader HttpHeaders headers){
+    public ResponseEntity<?> getEmployee(@PathVariable("id") UUID id, @RequestHeader HttpHeaders headers){
         Optional<Users> users = usersService.findUserById(id);
         if(users.isPresent()){
             return ResponseEntity.status(HttpStatus.OK).body(users.get());
