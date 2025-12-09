@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.JdbcTypeCode;
 
+import java.io.Serializable;
 import java.sql.Types;
 import java.util.UUID;
 @Data
@@ -14,11 +15,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "Users")
-public class Users {
+public class Users implements Serializable {
+    private static final long serialVersionUID=1L;
     @Id
     @GeneratedValue(generator = "UUID")
     @JdbcTypeCode(Types.VARCHAR)
-    public UUID userId;
+    @Column(name="userId")
+    public UUID id;
     @Column(name="userName")
     public String userName;
     @Column(name="password")
