@@ -1,0 +1,29 @@
+package com.renderdeployment.renderdemo.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Columns;
+import org.hibernate.annotations.JdbcTypeCode;
+
+import java.sql.Types;
+import java.util.UUID;
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = "Users")
+public class Users {
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @JdbcTypeCode(Types.VARCHAR)
+    public UUID userId;
+    @Column(name="userName")
+    public String userName;
+    @Column(name="password")
+    public String password;
+    @Column(name="email")
+    public String email;
+
+}
