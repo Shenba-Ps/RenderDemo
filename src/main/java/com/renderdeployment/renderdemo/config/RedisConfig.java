@@ -3,10 +3,12 @@ package com.renderdeployment.renderdemo.config;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisPassword;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 
 import java.time.Duration;
 
@@ -15,12 +17,24 @@ import java.time.Duration;
 public class RedisConfig {
 
     @Bean
-    @Primary
-    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+    public LettuceConnectionFactory redisConnectionFactory() {
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+        config.setHostName(System.getenv("UPSTASH_REDIS_HOST"));
+        config.setPort(Integer.parseInt(System.getenv("UPSTASH_REDIS_PORT")));
+        config.setPassword(RedisPassword.of(System.getenv("UPSTASH_REDIS_PASSWORD")));
 
+        // Build Lettuce client configuration
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                .useSsl()  // enable SSL
+                .build();
+
+        return new LettuceConnectionFactory(config, clientConfig);
+    }
+
+    @Bean
+    public RedisCacheManager cacheManager(LettuceConnectionFactory connectionFactory) {
         return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(cacheConfiguration())              // global default
-                //.withInitialCacheConfigurations(cacheConfigs)     // per‑cache overrides
+                .cacheDefaults(cacheConfiguration())
                 .build();
     }
 
