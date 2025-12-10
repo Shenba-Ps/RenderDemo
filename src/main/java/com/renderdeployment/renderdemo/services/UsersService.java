@@ -50,6 +50,7 @@ public class UsersService {
             @CacheEvict(value = "USERS_ALL", allEntries = true)
     })
     public void deleteUserById(UUID userId){
+        logger.info("delete user::");
         usersRepo.deleteById(userId);
     }
 
