@@ -10,6 +10,8 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.Schedules;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -52,6 +54,11 @@ public class UsersService {
     public void deleteUserById(UUID userId){
         logger.info("delete user::");
         usersRepo.deleteById(userId);
+    }
+
+    @Scheduled(fixedRate = 5000)
+    public void schedulingtest(){
+        logger.info("schedulingtest ::");
     }
 
 }
