@@ -20,16 +20,19 @@ import java.util.UUID;
 
 @Service
 public class UsersService {
+
     @Autowired
     private UsersRepo usersRepo;
+
     public Logger logger = LoggerFactory.getLogger(UsersService.class);
+
     @CachePut(value = "USERS", key = "#result.id")
-    @CacheEvict(value = "USERS_ALL", allEntries = true)
     public Users addUser( Users users){
         logger.info("addUser::"+users.getUserName());
         return usersRepo.save(users);
     }
-    @Cacheable(value = "USERS", key = "#userId")
+
+    @Cacheable(value = "USERS", key = "#userId" )
     public Optional<Users> findUserById(UUID userId){
         logger.info("Hitting db::");
         return usersRepo.findById(userId);
@@ -41,10 +44,7 @@ public class UsersService {
         return usersRepo.findAll();
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "USERS", key = "#userId"),
-            @CacheEvict(value = "USERS_ALL", allEntries = true)
-    })
+    @CacheEvict(value = "USERS", key = "#userId")
     public void deleteUserById(UUID userId){
         usersRepo.deleteById(userId);
     }
