@@ -1,7 +1,14 @@
 package com.renderdeployment.renderdemo.controller;
 
+import com.renderdeployment.renderdemo.constant.Messages;
+import com.renderdeployment.renderdemo.dto.UserDto;
 import com.renderdeployment.renderdemo.entity.Users;
+import com.renderdeployment.renderdemo.enumeration.RequestType;
+import com.renderdeployment.renderdemo.response.ResponseGenerator;
+import com.renderdeployment.renderdemo.response.TransactionContext;
 import com.renderdeployment.renderdemo.services.UsersService;
+import com.renderdeployment.renderdemo.validator.UserValidation;
+import com.renderdeployment.renderdemo.validator.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,34 +27,65 @@ public class UsersController {
  public Logger log = LoggerFactory.getLogger(UsersController.class);
     @Autowired
     private UsersService usersService;
+    @Autowired
+    private  ResponseGenerator responseGenerator;
+
+    @Autowired
+    private UserValidation userValidation;
+
+
     @PostMapping("/addUsers")
-    public ResponseEntity<?> getEmployee(@RequestBody Users users, @RequestHeader HttpHeaders headers){
-        Users user = usersService.addUser(users);
-        return ResponseEntity.status(HttpStatus.OK).body(user);
-    }
-
-    @GetMapping("/getEmpById/{id}")
-    public ResponseEntity<?> getEmployee(@PathVariable("id") UUID id, @RequestHeader HttpHeaders headers){
-        Optional<Users> users = usersService.findUserById(id);
-        if(users.isPresent()){
-            return ResponseEntity.status(HttpStatus.OK).body(users.get());
+    public ResponseEntity<?> createUser(@RequestBody UserDto users, @RequestHeader HttpHeaders headers){
+        TransactionContext context = responseGenerator.generateTransationContext(headers);
+        try{
+            ValidationResult validationResult = userValidation.validate(RequestType.POST, users);
+            Users user = usersService.addUser((Users)validationResult.getObject());
+            return responseGenerator.successResponse(context, Messages.SUCESS_MESSAGE,user, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return responseGenerator.errorResponse(context, e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        return ResponseEntity.notFound().build();
+
+
     }
 
-    @GetMapping("/findAllUsers")
-    public ResponseEntity<?> findAllUsers(@RequestHeader HttpHeaders httpHeader){
+    @GetMapping(value="/getEmpById/{id}", produces = "application/json")
+    public ResponseEntity<?> getUserById(@PathVariable("id") UUID id, @RequestHeader HttpHeaders httpHeader){
+        TransactionContext context = responseGenerator.generateTransationContext(httpHeader);
+        try{
+            Optional<Users> users = usersService.findUserById(id);
+                return responseGenerator.successGetResponse(context, Messages.USER_RETRIVED, users,
+                        HttpStatus.OK);
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+            return responseGenerator.errorResponse(context, e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
 
-        List<Users> users = usersService.findAllUsers();
-        return ResponseEntity.status(HttpStatus.FOUND).body(users);
+
+    }
+
+    @GetMapping(value="/findAllUsers", produces = "application/json")
+    public ResponseEntity<?> findAllUsers(@RequestHeader HttpHeaders httpHeader){
+        TransactionContext context = responseGenerator.generateTransationContext(httpHeader);
+        try{
+            List<Users> users = usersService.findAllUsers();
+            return responseGenerator.successGetResponse(context, Messages.USER_RETRIVED,
+                    users, HttpStatus.OK);
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+            return responseGenerator.errorResponse(context, e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
     }
     @DeleteMapping("/deleteUser/{id}")
-    public ResponseEntity<?> deleteUserById(@PathVariable("id") UUID id,@RequestHeader HttpHeaders headers){
+    public ResponseEntity<?> deleteUserById(@PathVariable("id") UUID id,@RequestHeader HttpHeaders httpHeader){
+        TransactionContext context = responseGenerator.generateTransationContext(httpHeader);
         try{
             usersService.deleteUserById(id);
-            return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully with ID: " + id);
+            return responseGenerator.successResponse(context,Messages.USER_DELETED,HttpStatus.OK);
         }catch(Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+            log.error(e.getMessage(), e);
+            return responseGenerator.errorResponse(context, e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }
