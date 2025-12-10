@@ -1,5 +1,6 @@
 package com.renderdeployment.renderdemo.entity;
 
+import com.renderdeployment.renderdemo.enumeration.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,7 +35,12 @@ public class Users implements Serializable {
     @Column(name="password")
     public String password;
 
+    @Column(name = "name")
+    private String name;
+
     @Column(name="email")
     public String email;
 
+    @Column(name = "role")
+    private Role role = Role.ADMIN;
 }

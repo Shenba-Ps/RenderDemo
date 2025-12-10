@@ -65,7 +65,8 @@ public class UserValidation {
         }
         if(null==userObj) {
             userObj = Users.builder().userName(request.getUserName())
-                    .password(request.getPassword()).email(request.getEmail()).
+                    .password(request.getPassword()).email(request.getEmail()).role(request.getRole())
+                            .name(request.getName()).
                     build();
 
         }
@@ -74,6 +75,8 @@ public class UserValidation {
             userObj.setUserName(request.getUserName());
             userObj.setEmail(request.getEmail());
             userObj.setPassword(request.getPassword());
+            userObj.setName(request.getName());
+            userObj.setRole(request.getRole());
 
 
         }

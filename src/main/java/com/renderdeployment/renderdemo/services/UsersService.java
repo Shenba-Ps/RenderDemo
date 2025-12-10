@@ -2,6 +2,7 @@ package com.renderdeployment.renderdemo.services;
 
 import com.renderdeployment.renderdemo.Repo.UsersRepo;
 import com.renderdeployment.renderdemo.entity.Users;
+import com.renderdeployment.renderdemo.util.PasswordUtil;
 import org.apache.catalina.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,26 +14,45 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.Schedules;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-@Service
-public class UsersService {
+@Service("userService")
+public class UsersService implements UserDetailsService {
 
     @Autowired
     private UsersRepo usersRepo;
 
     public Logger logger = LoggerFactory.getLogger(UsersService.class);
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<Users> userOptional = usersRepo.findByUserName(username);
+        if(!userOptional.isPresent()){
+            throw new UsernameNotFoundException("Invalid username or password.");
+        }
+        Users user = userOptional.get();
+        return new org.springframework.security.core.userdetails.User(user.getUserName(), user.getPassword(), getAuthority());
+    }
+
+    private List<SimpleGrantedAuthority> getAuthority() {
+        return Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    }
+
+
     @CachePut(value = "USERS", key = "#result.id")
     @CacheEvict(value = "USERS_ALL", allEntries = true)
     public Users addUser( Users users){
         logger.info("addUser::"+users.getUserName());
+        users.setPassword(PasswordUtil.getEncryptedPassword(users.getPassword()));
+        logger.info("Password::"+users.getPassword());
         return usersRepo.save(users);
     }
 
@@ -63,5 +83,14 @@ public class UsersService {
       List<Users> userList =  usersRepo.findAll();
         logger.info("userList:: ::"+ userList);
     }
+    //password generator randomly
+    public static String generateRandomPassword(int len) {
 
+        String chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%&";
+        Random rnd = new Random();
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++)
+            sb.append(chars.charAt(rnd.nextInt(chars.length())));
+        return sb.toString();
+    }
 }
