@@ -27,6 +27,7 @@ public class UsersService {
     public Logger logger = LoggerFactory.getLogger(UsersService.class);
 
     @CachePut(value = "USERS", key = "#result.id")
+    @CacheEvict(value = "USERS_ALL", allEntries = true)
     public Users addUser( Users users){
         logger.info("addUser::"+users.getUserName());
         return usersRepo.save(users);
@@ -44,7 +45,10 @@ public class UsersService {
         return usersRepo.findAll();
     }
 
-    @CacheEvict(value = "USERS", key = "#userId")
+    @Caching(evict = {
+            @CacheEvict(value = "USERS", key = "#userId"),
+            @CacheEvict(value = "USERS_ALL", allEntries = true)
+    })
     public void deleteUserById(UUID userId){
         usersRepo.deleteById(userId);
     }
