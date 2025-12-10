@@ -56,7 +56,7 @@ public class UsersService {
         usersRepo.deleteById(userId);
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(cron = "0 0 0 * * ?")
     public void schedulingtest(){
         logger.info("schedulingtest ::");
     }
