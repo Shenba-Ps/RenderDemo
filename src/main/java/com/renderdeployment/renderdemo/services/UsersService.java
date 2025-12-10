@@ -2,6 +2,7 @@ package com.renderdeployment.renderdemo.services;
 
 import com.renderdeployment.renderdemo.Repo.UsersRepo;
 import com.renderdeployment.renderdemo.entity.Users;
+import org.apache.catalina.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,8 @@ public class UsersService {
     @Scheduled(cron = "0 0 0 * * ?")
     public void schedulingtest(){
         logger.info("schedulingtest ::");
+      List<Users> userList =  usersRepo.findAll();
+        logger.info("userList:: ::"+ userList);
     }
 
 }
