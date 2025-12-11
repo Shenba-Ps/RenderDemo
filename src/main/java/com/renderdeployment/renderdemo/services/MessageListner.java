@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Configuration;
 public class MessageListner {
      Logger logger = LoggerFactory.getLogger(MessageListner.class);
 
-    @RabbitListener(queues = MessagingConfig.QUEUE)
+/*    @RabbitListener(queues = MessagingConfig.QUEUE)
     public void consumeMessageFromQueue(MessageDto obj) {
         System.out.println("Message recieved from queue : " + obj);
         logger.info("Message recieved from queue : " + obj);
-    }
+    }*/
 }
