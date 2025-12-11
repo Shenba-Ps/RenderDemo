@@ -83,10 +83,10 @@ public class UsersService implements UserDetailsService {
             return usersRepo.saveAndFlush(users);
         }else {
             MessageDto userobj = new MessageDto(users,"ordered","test");
-            System.out.println("ENV RABBITMQ URI = " + System.getenv("SPRING_RABBITMQ_URI"));
+           // System.out.println("ENV RABBITMQ URI = " + System.getenv("SPRING_RABBITMQ_URI"));
             Object response =  rabbitTemplate.convertSendAndReceive(MessagingConfig.EXCHANGE,MessagingConfig.ROUTING_KEY,userobj);
             logger.info("response RabbitMQ"+response);
-            return users;
+            return usersRepo.saveAndFlush(users);
         }
 
     }
