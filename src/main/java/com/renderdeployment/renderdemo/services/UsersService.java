@@ -84,8 +84,8 @@ public class UsersService implements UserDetailsService {
         }else {
             MessageDto userobj = new MessageDto(users,"ordered","test");
             System.out.println("ENV RABBITMQ URI = " + System.getenv("SPRING_RABBITMQ_URI"));
-            rabbitTemplate.convertAndSend(MessagingConfig.EXCHANGE,MessagingConfig.ROUTING_KEY,userobj);
-            logger.info("Message sent to RabbitMQ");
+            Object response =  rabbitTemplate.convertSendAndReceive(MessagingConfig.EXCHANGE,MessagingConfig.ROUTING_KEY,userobj);
+            logger.info("response RabbitMQ"+response);
             return users;
         }
 
