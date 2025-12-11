@@ -86,6 +86,7 @@ public class UsersService implements UserDetailsService {
            // System.out.println("ENV RABBITMQ URI = " + System.getenv("SPRING_RABBITMQ_URI"));
             Object response =  rabbitTemplate.convertSendAndReceive(MessagingConfig.EXCHANGE,MessagingConfig.ROUTING_KEY,userobj);
             logger.info("response RabbitMQ"+response);
+            users.setPassword(PasswordUtil.getEncryptedPassword(users.getPassword()));
             return usersRepo.saveAndFlush(users);
         }
 
