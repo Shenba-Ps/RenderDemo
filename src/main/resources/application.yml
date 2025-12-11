@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: renderDemo
+
+  datasource:
+    url: jdbc:postgresql://dpg-d4rp0dili9vc73ddsnp0-a.singapore-postgres.render.com:5432/shenba
+    username: shenba
+    password: w0iJEirXg31yhmfzajrJxrXTwW9H9isr
+    hikari:
+      maximum-pool-size: 2
+      auto-commit: false
+      data-source-properties:
+        ssl: true
+        sslmode: require
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  main:
+    allow-circular-references: true
+
+  cache:
+    type: redis
+
+  redis:
+    host: ${UPSTASH_REDIS_HOST}
+    port: ${UPSTASH_REDIS_PORT}
+    password: ${UPSTASH_REDIS_PASSWORD}
+    timeout: 120s
+    ssl:
+      enabled: true
+
+  rabbitmq:
+    uri: ${SPRING_RABBITMQ_URI}
+    # fallback if needed
+    addresses: amqps://gicdzucg:LkSM27kzjstopmsskbf8WL_N9HkIcovd@kingfisher.lmq.cloudamqp.com/gicdzucg
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ssrcooling@gmail.com
+    password: "eihh jsnv vkig xgbk"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: smtp.gmail.com
+
+server:
+  port: 8080
