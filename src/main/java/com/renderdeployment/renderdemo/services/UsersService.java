@@ -77,9 +77,9 @@ public class UsersService implements UserDetailsService {
             String message = "New User";
             //sendEmail(to,subject,message);
             return usersRepo.saveAndFlush(users);
-        }else {
+        }/*else {
             return usersRepo.saveAndFlush(users);
-        }
+        }*/
 
     }
 

@@ -62,7 +62,7 @@ public class UsersController {
     public ResponseEntity<?> updateUser(@RequestBody UserDto users, @RequestHeader HttpHeaders headers){
         TransactionContext context = responseGenerator.generateTransationContext(headers);
         try{
-            ValidationResult validationResult = userValidation.validate(RequestType.POST, users);
+            ValidationResult validationResult = userValidation.validate(RequestType.PUT, users);
             Users user = usersService.addOrUpdateUser((Users)validationResult.getObject());
             return responseGenerator.successResponse(context, Messages.SUCESS_MESSAGE,user, HttpStatus.OK);
         } catch (Exception e) {
