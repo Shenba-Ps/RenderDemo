@@ -26,10 +26,10 @@ public class Users implements Serializable {
     @Id
     @GeneratedValue(generator = "UUID")
     @JdbcTypeCode(Types.VARCHAR)
-    @Column(name="userId")
+    @Column(name="userid")
     public UUID id;
 
-    @Column(name="userName")
+    @Column(name="username")
     public String userName;
 
     @Column(name="password")

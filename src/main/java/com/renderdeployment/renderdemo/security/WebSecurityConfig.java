@@ -62,8 +62,8 @@ public class WebSecurityConfig {
                                 "/addUsers",
                                 "/auth/change/password",
                                 "/swagger-ui.html",
-                                "/file/view/**",
-                                "/api/employee/checkin",
+                                "/file/view/**"
+                              /*  "/api/employee/checkin",
                                 "/api/signin",
                                 "/api/employee/getEmployeeDetails",
                                 "/api/employee/get/{employeeId}",
@@ -71,8 +71,8 @@ public class WebSecurityConfig {
                                 "/api/projectAssinged/getAll",
                                 "/api/projectAssinged/get/{id}",
                                 "/api/project",
-                                "/api/getProjectByActivelist"
-                        ).permitAll()
+                                "/api/getProjectByActivelist"*/
+                        ).permitAll() .requestMatchers("/findAllUsers").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))

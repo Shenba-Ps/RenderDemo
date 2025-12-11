@@ -12,8 +12,11 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.Schedules;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -31,29 +34,53 @@ public class UsersService implements UserDetailsService {
     private UsersRepo usersRepo;
 
     public Logger logger = LoggerFactory.getLogger(UsersService.class);
+    @Autowired
+    private JavaMailSender javaMailSender;
+//    @Value("${spring.mail.username}") private String sender;
 
+    public void sendEmail(String to,String subject,String message){
+        SimpleMailMessage sm=new SimpleMailMessage();
+        sm.setFrom("ssrcooling@gmail.com");
+        sm.setTo(to);
+        sm.setSubject(subject);
+        sm.setText(message);
+        javaMailSender.send(sm);
+    }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Users> userOptional = usersRepo.findByUserName(username);
-        if(!userOptional.isPresent()){
-            throw new UsernameNotFoundException("Invalid username or password.");
-        }
-        Users user = userOptional.get();
-        return new org.springframework.security.core.userdetails.User(user.getUserName(), user.getPassword(), getAuthority());
+
+        Users user = usersRepo.findByUserName(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid username or password."));
+
+        // Build authorities based on user's role from DB
+        List<GrantedAuthority> authorities =
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUserName(),
+                user.getPassword(),
+                authorities
+        );
     }
 
-    private List<SimpleGrantedAuthority> getAuthority() {
-        return Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN"));
-    }
 
 
     @CachePut(value = "USERS", key = "#result.id")
     @CacheEvict(value = "USERS_ALL", allEntries = true)
-    public Users addUser( Users users){
-        logger.info("addUser::"+users.getUserName());
-        users.setPassword(PasswordUtil.getEncryptedPassword(users.getPassword()));
-        logger.info("Password::"+users.getPassword());
-        return usersRepo.save(users);
+    public Users addOrUpdateUser( Users users){
+        if(users.getId() == null){
+            logger.info("addUser::"+users.getUserName());
+            users.setPassword(PasswordUtil.getEncryptedPassword(users.getPassword()));
+            logger.info("Password::"+users.getPassword());
+            String to = "tndsenbag@gmail.com";
+            String subject = "New User";
+            String message = "New User";
+            //sendEmail(to,subject,message);
+            return usersRepo.saveAndFlush(users);
+        }else {
+            return usersRepo.saveAndFlush(users);
+        }
+
     }
 
     @Cacheable(value = "USERS", key = "#userId" )

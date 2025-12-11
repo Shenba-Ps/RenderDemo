@@ -1,6 +1,8 @@
 package com.renderdeployment.renderdemo.controller;
 
+import com.renderdeployment.renderdemo.config.MessagingConfig;
 import com.renderdeployment.renderdemo.constant.Messages;
+import com.renderdeployment.renderdemo.dto.MessageDto;
 import com.renderdeployment.renderdemo.dto.UserDto;
 import com.renderdeployment.renderdemo.entity.Users;
 import com.renderdeployment.renderdemo.enumeration.RequestType;
@@ -11,6 +13,7 @@ import com.renderdeployment.renderdemo.validator.UserValidation;
 import com.renderdeployment.renderdemo.validator.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -33,13 +36,33 @@ public class UsersController {
     @Autowired
     private UserValidation userValidation;
 
+    @Autowired
+    public RabbitTemplate rabbitTemplate;
 
     @PostMapping("/addUsers")
     public ResponseEntity<?> createUser(@RequestBody UserDto users, @RequestHeader HttpHeaders headers){
         TransactionContext context = responseGenerator.generateTransationContext(headers);
         try{
             ValidationResult validationResult = userValidation.validate(RequestType.POST, users);
-            Users user = usersService.addUser((Users)validationResult.getObject());
+            Users user = usersService.addOrUpdateUser((Users)validationResult.getObject());
+            MessageDto userobj = new MessageDto(user,"ordered","test");
+            rabbitTemplate.convertAndSend(MessagingConfig.EXCHANGE,MessagingConfig.ROUTING_KEY,userobj);
+            log.info("Message sent to RabbitMQ");
+            return responseGenerator.successResponse(context, Messages.SUCESS_MESSAGE,user, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return responseGenerator.errorResponse(context, e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
+
+    }
+
+    @PutMapping("/updateUser")
+    public ResponseEntity<?> updateUser(@RequestBody UserDto users, @RequestHeader HttpHeaders headers){
+        TransactionContext context = responseGenerator.generateTransationContext(headers);
+        try{
+            ValidationResult validationResult = userValidation.validate(RequestType.POST, users);
+            Users user = usersService.addOrUpdateUser((Users)validationResult.getObject());
             return responseGenerator.successResponse(context, Messages.SUCESS_MESSAGE,user, HttpStatus.OK);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
