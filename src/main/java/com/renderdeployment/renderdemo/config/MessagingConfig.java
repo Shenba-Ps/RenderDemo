@@ -21,7 +21,7 @@ public class MessagingConfig {
 
     @Bean
     public Queue queue() {
-        return new Queue(QUEUE);
+        return new Queue(QUEUE, true); // durable = true (recommended)
     }
 
     @Bean
@@ -40,9 +40,9 @@ public class MessagingConfig {
     }
 
     @Bean
-    public AmqpTemplate template(ConnectionFactory connectionFactory) {
-        final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter((MessageConverter) messageConverter());
+    public AmqpTemplate amqpTemplate(ConnectionFactory connectionFactory) {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(messageConverter());
         return rabbitTemplate;
     }
 }
