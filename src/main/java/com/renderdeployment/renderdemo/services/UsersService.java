@@ -1,11 +1,14 @@
 package com.renderdeployment.renderdemo.services;
 
 import com.renderdeployment.renderdemo.Repo.UsersRepo;
+import com.renderdeployment.renderdemo.config.MessagingConfig;
+import com.renderdeployment.renderdemo.dto.MessageDto;
 import com.renderdeployment.renderdemo.entity.Users;
 import com.renderdeployment.renderdemo.util.PasswordUtil;
 import org.apache.catalina.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -32,7 +35,8 @@ public class UsersService implements UserDetailsService {
 
     @Autowired
     private UsersRepo usersRepo;
-
+    @Autowired
+    public RabbitTemplate rabbitTemplate;
     public Logger logger = LoggerFactory.getLogger(UsersService.class);
     @Autowired
     private JavaMailSender javaMailSender;
@@ -77,9 +81,13 @@ public class UsersService implements UserDetailsService {
             String message = "New User";
             //sendEmail(to,subject,message);
             return usersRepo.saveAndFlush(users);
-        }/*else {
-            return usersRepo.saveAndFlush(users);
-        }*/
+        }else {
+            MessageDto userobj = new MessageDto(users,"ordered","test");
+            System.out.println("ENV RABBITMQ URI = " + System.getenv("SPRING_RABBITMQ_URI"));
+            rabbitTemplate.convertAndSend(MessagingConfig.EXCHANGE,MessagingConfig.ROUTING_KEY,userobj);
+            logger.info("Message sent to RabbitMQ");
+            return users;
+        }
 
     }
 

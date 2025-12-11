@@ -36,8 +36,7 @@ public class UsersController {
     @Autowired
     private UserValidation userValidation;
 
-    @Autowired
-    public RabbitTemplate rabbitTemplate;
+
 
     @PostMapping("/addUsers")
     public ResponseEntity<?> createUser(@RequestBody UserDto users, @RequestHeader HttpHeaders headers){
@@ -45,10 +44,7 @@ public class UsersController {
         try{
             ValidationResult validationResult = userValidation.validate(RequestType.POST, users);
             Users user = usersService.addOrUpdateUser((Users)validationResult.getObject());
-            MessageDto userobj = new MessageDto(user,"ordered","test");
-            System.out.println("ENV RABBITMQ URI = " + System.getenv("SPRING_RABBITMQ_URI"));
-            rabbitTemplate.convertAndSend(MessagingConfig.EXCHANGE,MessagingConfig.ROUTING_KEY,userobj);
-            log.info("Message sent to RabbitMQ");
+
             return responseGenerator.successResponse(context, Messages.SUCESS_MESSAGE,user, HttpStatus.OK);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
