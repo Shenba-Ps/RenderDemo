@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 @Component
 public class ResponseGenerator {
@@ -50,7 +51,9 @@ public class ResponseGenerator {
         Response response = new Response();
         response.setData(object);
         response.setMessage(message);
-        response.setTimeStamp(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date()));
+       // response.setTimeStamp(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date()));
+        response.setTimeStamp(LocalDateTime.now().toString());
+
         logger.debug("response class is " + Data.class);
         logger.debug("response status is " + httpStatus.toString());
         ResponseEntity<Response> responseEntity = new ResponseEntity<Response>(response, headers, httpStatus);
