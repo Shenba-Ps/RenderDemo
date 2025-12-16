@@ -15,4 +15,5 @@ public class PaymentResponse {
     private String message;
     private String sessionId;
     private String sessionUrl;
+    private String paymentId;
 }
