@@ -46,7 +46,7 @@ logger.info("JWT Token: " + jwtToken);
                 entity,
                 PaymentResponse.class
         );
-
+        logger.info("response:::"+response.getBody());
         return response.getBody();
     }
 }
